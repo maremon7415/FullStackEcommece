@@ -21,7 +21,7 @@ app.use(express.json());
 // CORS setup (local + main frontend + admin frontend)
 const allowedOrigins = [
   "http://localhost:5173", // Local frontend
-  "https://myshop-frontend-puce.vercel.app/", // Main frontend
+  "https://myshop-frontend-puce.vercel.app", // Main frontend
   "https://myshop-admin-ivory.vercel.app", // Admin frontend
 ];
 
