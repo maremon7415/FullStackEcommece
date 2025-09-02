@@ -18,10 +18,11 @@ connectCloudinary();
 // ---------- Middleware ----------
 app.use(express.json());
 
-// CORS setup (safe for local + deployed frontend)
+// CORS setup (local + main frontend + admin frontend)
 const allowedOrigins = [
   "http://localhost:5173", // Local frontend
-  "https://myshop-frontend.vercel.app", // Deployed frontend
+  "https://myshop-frontend.vercel.app", // Main frontend
+  "https://myshop-admin-ivory.vercel.app", // Admin frontend
 ];
 
 app.use(
