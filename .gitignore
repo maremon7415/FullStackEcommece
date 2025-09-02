@@ -1,0 +1,4 @@
+# Ignore environment files
+admin/.env
+frontEnd/.env
+backEnd/.env
