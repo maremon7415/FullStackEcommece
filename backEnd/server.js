@@ -18,11 +18,27 @@ connectCloudinary();
 // ---------- Middleware ----------
 app.use(express.json());
 
-// CORS setup (simpler for Vercel)
+// CORS setup (safe for local + deployed frontend)
+const allowedOrigins = [
+  "http://localhost:5173", // Local frontend
+  "https://myshop-frontend.vercel.app", // Deployed frontend
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://myshop-frontend.vercel.app"],
+    origin: function (origin, callback) {
+      // allow requests with no origin like Postman or server-to-server
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        console.log("Blocked by CORS:", origin);
+        return callback(new Error(`CORS not allowed for ${origin}`), false);
+      }
+
+      return callback(null, true);
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
@@ -30,6 +46,7 @@ app.use(
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 
+// Health check
 app.get("/", (req, res) => {
   res.send("API Working");
 });
