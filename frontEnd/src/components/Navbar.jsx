@@ -10,15 +10,18 @@ const navLinks = [
   { name: "About", to: "/about" },
   { name: "Contact", to: "/contact" },
 ];
-const userMenuItems = [
-  { name: "Profile", to: "/profile" },
-  { name: "Orders", to: "/orders" },
-  { name: "Log Out", to: "/login" },
-];
 
 const Navbar = () => {
-  const { showSearch, setShowSearch, getCartCount, setMobileNavLinks, user } =
-    useContext(ShopContext);
+  const {
+    showSearch,
+    setShowSearch,
+    getCartCount,
+    setMobileNavLinks,
+    token,
+    setToken,
+    navigate,
+    setCartItem,
+  } = useContext(ShopContext);
   const location = useLocation();
   const [userMenu, setUserMenu] = useState(false);
   const menuRef = useRef(null);
@@ -49,6 +52,13 @@ const Navbar = () => {
 
   const handleUserMenuToggle = () => {
     setUserMenu((prev) => !prev);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setToken("");
+    setCartItem({});
+    navigate("/login");
   };
 
   return (
@@ -105,7 +115,7 @@ const Navbar = () => {
           <div className="relative" ref={menuRef}>
             <button
               onClick={handleUserMenuToggle}
-              className="transition-transform hover:scale-110"
+              className="transition-transform hover:scale-110 mt-[6px]"
               aria-expanded={userMenu}
               aria-label="User menu"
             >
@@ -122,24 +132,23 @@ const Navbar = () => {
                 <div className="absolute w-3 h-3 bg-white transform rotate-45 right-4 -top-1.5"></div>
                 <Link
                   to={"/profile"}
-                  className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
+                  className="block px-4 py-1  text-gray-700 text-[16px] hover:bg-gray-50 transition-colors"
                   onClick={() => setUserMenu(false)}
                 >
                   Profile
                 </Link>
                 <Link
                   to={"/orders"}
-                  className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
+                  className="block px-4 py-1 text-gray-700 text-[16px] hover:bg-gray-50 transition-colors"
                   onClick={() => setUserMenu(false)}
                 >
                   Orders
                 </Link>
-                {user ? (
+                {token ? (
                   <div>
                     <Link
-                      to={"/logout"}
-                      className="block px-4 py-2 text-red-500 text-sm hover:bg-gray-50 transition-colors"
-                      onClick={() => setUserMenu(false)}
+                      className="block px-4 py-1  text-red-500 text-[16px] hover:bg-gray-50 transition-colors"
+                      onClick={handleLogout}
                     >
                       Log-Out
                     </Link>
@@ -148,8 +157,7 @@ const Navbar = () => {
                   <div>
                     <Link
                       to={"/login"}
-                      className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
-                      onClick={() => setUserMenu(false)}
+                      className="block px-4 py-1 text-gray-700 text-[16px] hover:bg-gray-50 transition-colors"
                     >
                       Log-In
                     </Link>

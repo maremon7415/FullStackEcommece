@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../contexts/ShopContextsProvider";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -12,76 +12,90 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [validMessage, setValidMessage] = useState("");
 
-  // Submit handler with validation
-  const submitHandler = async (e) => {
-    e.preventDefault();
-
-    // Sign Up validation
+  // 🔹 Validation logic
+  const validateForm = () => {
     if (currentState === "Sign Up") {
       if (name.trim().length < 4) {
-        toast.error("Please enter a valid name (at least 4 characters)");
-        return;
+        return "Name must be at least 4 characters long";
       }
-
       if (!/^\S+@\S+\.\S+$/.test(email)) {
-        toast.error("Please enter a valid email address");
-        return;
+        return "Please enter a valid email address";
       }
-
-      if (password !== confirmPassword) {
-        toast.error("Passwords do not match");
-        return;
-      }
-
       if (password.length < 8) {
-        toast.error("Password must be at least 8 characters");
-        return;
+        return "Password must be at least 8 characters long";
+      }
+      if (password !== confirmPassword) {
+        return "Passwords do not match";
       }
     } else {
-      // Login validation
       if (!/^\S+@\S+\.\S+$/.test(email)) {
-        toast.error("Please enter a valid email address");
-        return;
+        return "Please enter a valid email address";
       }
-
       if (password.length < 8) {
-        toast.error("Password must be at least 8 characters");
-        return;
+        return "Password must be at least 8 characters long";
       }
     }
+    return ""; // no error
+  };
 
-    // API call
+  // 🔹 Form submit
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setValidMessage("");
+
+    // run validation
+    const error = validateForm();
+    if (error) {
+      setValidMessage(error);
+      return;
+    }
+
     try {
+      let response;
       if (currentState === "Sign Up") {
-        const response = await axios.post(`${backendUrl}/api/user/register`, {
+        response = await axios.post(`${backendUrl}/api/user/register`, {
           name,
           email,
           password,
         });
-        if (response.data.success) {
-          setToken(response.data.token);
-          localStorage.setItem("token", response.data.token);
-        } else {
-          toast.error(response.data.message);
-        }
       } else {
-        const response = await axios.post(`${backendUrl}/api/user/login`, {
+        response = await axios.post(`${backendUrl}/api/user/login`, {
           email,
           password,
         });
-        if (response.data.success) {
-          console.log(response.data);
-          localStorage.getItem("token", response.data.token);
-        } else {
-          toast.error(response.data.message);
-        }
+      }
+
+      if (response.data.success) {
+        const userToken = response.data.token;
+        localStorage.setItem("token", userToken);
+        setToken(userToken);
+      } else {
+        setValidMessage(response.data.message);
       }
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Something went wrong");
+      console.log(error.response?.data?.message);
     }
   };
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [token]);
+  useEffect(() => {
+    if (!token && localStorage.getItem("token")) {
+      setToken(localStorage.getItem("token"));
+    }
+  }, []);
+
+  const labelStyle = [
+    "absolute left-4 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm peer-focus:text-gray-900",
+  ];
+  const inputStyle = [
+    "peer w-full px-4 pt-5 pb-2 border border-gray-600 focus:outline-1 placeholder-transparent",
+  ];
 
   return (
     <div className="min-h-[calc(100vh-80px)] w-full bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
@@ -99,81 +113,79 @@ const Login = () => {
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={submitHandler}>
+        <form className="mt-8 space-y-2" onSubmit={submitHandler}>
           <div className="space-y-4">
             {/* Name input (Sign Up only) */}
             {currentState === "Sign Up" && (
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Full Name
-                </label>
+              <div className="relative">
                 <input
                   onChange={(e) => setName(e.target.value)}
                   value={name}
                   id="name"
                   type="text"
-                  placeholder="Enter your full name"
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  className={inputStyle}
                 />
+                <label htmlFor="name" className={labelStyle}>
+                  Full Name
+                </label>
               </div>
             )}
 
             {/* Email input */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email address
-              </label>
+            <div className="relative">
               <input
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
                 id="email"
                 type="email"
-                placeholder="Enter your email"
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className={inputStyle}
               />
+              <label htmlFor="email" className={labelStyle}>
+                Email address
+              </label>
             </div>
 
             {/* Password input */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
+            <div className="relative">
               <input
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className={inputStyle}
               />
+              <label htmlFor="password" className={labelStyle}>
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-4 text-sm text-gray-500"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
             </div>
 
             {/* Confirm Password (Sign Up only) */}
             {currentState === "Sign Up" && (
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Confirm Password
-                </label>
+              <div className="relative">
                 <input
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  className={inputStyle}
                 />
+                <label htmlFor="confirmPassword" className={labelStyle}>
+                  Confirm Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-4 text-sm text-gray-500"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
               </div>
             )}
           </div>
@@ -197,10 +209,13 @@ const Login = () => {
             </button>
           </div>
 
+          {/* Validation message */}
+          <div className="w-full text-sm text-red-500 h-4">{validMessage}</div>
+
           {/* Submit button */}
           <button
             type="submit"
-            className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300 ease-in-out"
+            className="w-full flex justify-center py-3 px-4 text-md font-medium  text-white bg-black hover:bg-gray-900 transition-colors duration-300"
           >
             {currentState}
           </button>

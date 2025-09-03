@@ -17,7 +17,7 @@ import MobileNavLinks from "./components/MobileNavLinks";
 
 const App = () => {
   return (
-    <div className="relative w-screen h-auto">
+    <div className="relative">
       <Navbar />
       <MobileNavLinks />
       <ToastContainer />
