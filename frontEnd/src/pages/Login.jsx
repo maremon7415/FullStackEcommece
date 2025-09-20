@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../contexts/ShopContextsProvider";
 import axios from "axios";
-import { toast } from "react-toastify";
 
 const Login = () => {
   const [currentState, setCurrentState] = useState("Sign Up");
@@ -14,7 +13,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [validMessage, setValidMessage] = useState("");
 
-  // 🔹 Validation logic
+  // Validation logic
   const validateForm = () => {
     if (currentState === "Sign Up") {
       if (name.trim().length < 4) {
@@ -37,10 +36,10 @@ const Login = () => {
         return "Password must be at least 8 characters long";
       }
     }
-    return ""; // no error
+    return "";
   };
 
-  // 🔹 Form submit
+  //  Form submit
   const submitHandler = async (e) => {
     e.preventDefault();
     setValidMessage("");
@@ -69,7 +68,11 @@ const Login = () => {
 
       if (response.data.success) {
         const userToken = response.data.token;
+        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000;
+
         localStorage.setItem("token", userToken);
+        localStorage.setItem("expiryTime", expiryTime);
+
         setToken(userToken);
       } else {
         setValidMessage(response.data.message);
@@ -84,11 +87,6 @@ const Login = () => {
       navigate("/");
     }
   }, [token]);
-  useEffect(() => {
-    if (!token && localStorage.getItem("token")) {
-      setToken(localStorage.getItem("token"));
-    }
-  }, []);
 
   const labelStyle = [
     "absolute left-4 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm peer-focus:text-gray-900",

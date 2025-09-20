@@ -6,7 +6,7 @@ const adminAuth = async (req, res, next) => {
     if (!token) {
       return res.json({ success: "false", message: "User not authrized" });
     }
-    const decodeToken = jwt.verify(token, process.env.JWT_SECRETE);
+    const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
     if (decodeToken !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
       return res.json({ success: "false", message: "User not authrized" });
     }

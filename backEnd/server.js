@@ -5,6 +5,8 @@ import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoute.js";
+import cartRouter from "./routes/cartRoute.js";
+import orderRouter from "./routes/orderRoute.js";
 
 // ---------- Config ----------
 dotenv.config();
@@ -21,6 +23,7 @@ app.use(express.json());
 // CORS setup (local + main frontend + admin frontend)
 const allowedOrigins = [
   "http://localhost:5173", // Local frontend
+  "http://localhost:5174", // Admin frontend
   "https://myshop-frontend-puce.vercel.app", // Main frontend
   "https://myshop-admin-ivory.vercel.app", // Admin frontend
 ];
@@ -30,12 +33,10 @@ app.use(
     origin: function (origin, callback) {
       // allow requests with no origin like Postman or server-to-server
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.indexOf(origin) === -1) {
         console.log("Blocked by CORS:", origin);
         return callback(new Error(`CORS not allowed for ${origin}`), false);
       }
-
       return callback(null, true);
     },
     credentials: true,
@@ -43,11 +44,13 @@ app.use(
   })
 );
 
-// ---------- API Endpoints ----------
+// ---------- API Endpoints ---------- //
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
 
-// Health check
+// Health check-------
 app.get("/", (req, res) => {
   res.send("API Working");
 });
