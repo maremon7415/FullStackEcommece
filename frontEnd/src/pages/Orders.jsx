@@ -16,6 +16,7 @@ import {
   FiCreditCard,
   FiMapPin,
 } from "react-icons/fi";
+import OrderDetailsModal from "./OrderDetailsModal";
 
 const Orders = () => {
   const { token, currency, backendUrl, navigate } = useContext(ShopContext);
@@ -43,7 +44,8 @@ const Orders = () => {
       );
 
       if (response.data.success) {
-        let orderItems = [];
+        const orderItems = [];
+
         response.data.orders.forEach((order) => {
           order.items.forEach((item) => {
             orderItems.push({
@@ -62,6 +64,7 @@ const Orders = () => {
         const sortedOrders = orderItems.sort(
           (a, b) => new Date(b.date) - new Date(a.date)
         );
+
         setOrdersData(sortedOrders);
         setFilteredOrders(sortedOrders);
       }
@@ -76,7 +79,6 @@ const Orders = () => {
   useEffect(() => {
     let filtered = ordersData;
 
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
@@ -85,7 +87,6 @@ const Orders = () => {
       );
     }
 
-    // Status filter
     if (filterStatus !== "all") {
       filtered = filtered.filter(
         (order) => order.status?.toLowerCase() === filterStatus.toLowerCase()
@@ -111,6 +112,8 @@ const Orders = () => {
         return <FiClock className="w-5 h-5 text-yellow-500" />;
       case "cancelled":
         return <FiX className="w-5 h-5 text-red-500" />;
+      case "order placed":
+        return <FiPackage className="w-5 h-5 text-purple-500" />;
       default:
         return <FiPackage className="w-5 h-5 text-gray-500" />;
     }
@@ -127,6 +130,8 @@ const Orders = () => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "cancelled":
         return "bg-red-100 text-red-800 border-red-200";
+      case "order placed":
+        return "bg-purple-100 text-purple-800 border-purple-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -170,143 +175,6 @@ const Orders = () => {
     </div>
   );
 
-  // Order Detail Modal
-  const OrderModal = () => {
-    if (!selectedOrder) return null;
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-        <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-            <h3 className="text-xl font-semibold">Order Details</h3>
-            <button
-              onClick={closeModal}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <FiX className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-6">
-            {/* Order Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Order ID</p>
-                <p className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                  {selectedOrder.orderId}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Order Date</p>
-                <p className="flex items-center gap-2">
-                  <FiCalendar className="w-4 h-4" />
-                  {formatDate(selectedOrder.date)}
-                </p>
-              </div>
-            </div>
-
-            {/* Product Details */}
-            <div className="border rounded-lg p-4">
-              <div className="flex items-start gap-4">
-                <img
-                  className="w-24 h-24 object-cover rounded-lg"
-                  src={
-                    selectedOrder.image?.[0]?.url ||
-                    selectedOrder.image?.[0] ||
-                    "/placeholder.jpg"
-                  }
-                  alt={selectedOrder.name}
-                />
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg mb-2">
-                    {selectedOrder.name}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Price: </span>
-                      <span className="font-medium">
-                        {currency}
-                        {selectedOrder.price}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Quantity: </span>
-                      <span className="font-medium">
-                        {selectedOrder.quantity}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Size: </span>
-                      <span className="font-medium">{selectedOrder.size}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Total: </span>
-                      <span className="font-medium">
-                        {currency}
-                        {(selectedOrder.price * selectedOrder.quantity).toFixed(
-                          2
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Status & Payment */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Status</p>
-                <div
-                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm border ${getStatusColor(
-                    selectedOrder.status
-                  )}`}
-                >
-                  {getStatusIcon(selectedOrder.status)}
-                  {selectedOrder.status || "Processing"}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Payment Method</p>
-                <div className="flex items-center gap-2">
-                  <FiCreditCard className="w-4 h-4" />
-                  <span>{selectedOrder.paymentMethod || "N/A"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Shipping Address */}
-            {selectedOrder.address && (
-              <div>
-                <p className="text-sm text-gray-500 mb-2 flex items-center gap-2">
-                  <FiMapPin className="w-4 h-4" />
-                  Shipping Address
-                </p>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="font-medium">
-                    {selectedOrder.address.firstName}{" "}
-                    {selectedOrder.address.lastName}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {selectedOrder.address.street}
-                    <br />
-                    {selectedOrder.address.city}, {selectedOrder.address.state}{" "}
-                    {selectedOrder.address.zipCode}
-                    <br />
-                    {selectedOrder.address.country}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Phone: {selectedOrder.address.phone}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="pageW py-8 lg:py-12">
@@ -333,7 +201,6 @@ const Orders = () => {
         {/* Filters */}
         <div className="bg-white rounded-xl p-6 shadow-sm border mb-6">
           <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
             <div className="flex-1 relative">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -345,7 +212,6 @@ const Orders = () => {
               />
             </div>
 
-            {/* Status Filter */}
             <div className="relative">
               <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <select
@@ -354,51 +220,12 @@ const Orders = () => {
                 className="pl-10 pr-8 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent bg-white min-w-[150px]"
               >
                 <option value="all">All Orders</option>
+                <option value="order placed">Order Placed</option>
                 <option value="processing">Processing</option>
                 <option value="shipped">Shipped</option>
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
               </select>
-            </div>
-          </div>
-
-          {/* Order Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">
-                {ordersData.length}
-              </div>
-              <div className="text-sm text-gray-500">Total Orders</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {
-                  ordersData.filter(
-                    (o) => o.status?.toLowerCase() === "processing"
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-gray-500">Processing</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {
-                  ordersData.filter(
-                    (o) => o.status?.toLowerCase() === "shipped"
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-gray-500">Shipped</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {
-                  ordersData.filter(
-                    (o) => o.status?.toLowerCase() === "delivered"
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-gray-500">Delivered</div>
             </div>
           </div>
         </div>
@@ -436,21 +263,13 @@ const Orders = () => {
                 className="bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition-all duration-200 group"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-                  {/* Product Image & Info */}
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="relative">
-                      <img
-                        className="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-lg shadow-sm"
-                        src={
-                          item.image?.[0]?.url ||
-                          item.image?.[0] ||
-                          "/placeholder.jpg"
-                        }
-                        alt={item.name}
-                        onError={(e) => (e.target.src = "/placeholder.jpg")}
-                      />
-                    </div>
-
+                    <img
+                      className="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-lg shadow-sm"
+                      src={item.image?.[0]?.url || "/placeholder.jpg"}
+                      alt={item.name}
+                      onError={(e) => (e.target.src = "/placeholder.jpg")}
+                    />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg text-gray-900 mb-2 truncate">
                         {item.name || "Unknown Product"}
@@ -496,7 +315,6 @@ const Orders = () => {
                     </div>
                   </div>
 
-                  {/* Status & Actions */}
                   <div className="flex flex-col lg:items-end gap-4 lg:min-w-[200px]">
                     <div
                       className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm border ${getStatusColor(
@@ -527,8 +345,13 @@ const Orders = () => {
           </div>
         )}
 
-        {/* Order Detail Modal */}
-        {showModal && <OrderModal />}
+        {showModal && (
+          <OrderDetailsModal
+            order={selectedOrder}
+            currency={currency}
+            onClose={closeModal}
+          />
+        )}
       </div>
     </div>
   );

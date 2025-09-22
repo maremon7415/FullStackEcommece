@@ -3,8 +3,6 @@ import userModel from "../models/userModel.js";
 //add products to cart
 const addToCart = async (req, res) => {
   try {
-    console.log("Add to cart request body:", req.body); // Debug log
-
     const { userId, itemId, size } = req.body;
 
     // Validate required fields from frontend
@@ -15,11 +13,7 @@ const addToCart = async (req, res) => {
       });
     }
 
-    // userId is guaranteed to exist from middleware
-    console.log("Processing cart for user:", userId);
     const userData = await userModel.findById(userId);
-
-    console.log("Current cartData:", userData.cartData);
 
     // Initialize cartData if it doesn't exist
     let cartData = userData.cartData || {};
@@ -31,8 +25,6 @@ const addToCart = async (req, res) => {
     } else {
       cartData[itemId][size] = 1;
     }
-
-    console.log("Updated cartData:", cartData);
 
     await userModel.findByIdAndUpdate(userId, { cartData });
     res.json({ success: true, message: "Added To Cart" });
@@ -89,6 +81,8 @@ const getUserCart = async (req, res) => {
 
     // userId is guaranteed to exist from middleware
     const userData = await userModel.findById(userId);
+    if (!userData) res.json({ success: false, message: "User Not Exist" });
+
     let cartData = userData.cartData || {};
 
     res.json({ success: true, cartData });

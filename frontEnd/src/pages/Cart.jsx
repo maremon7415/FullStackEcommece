@@ -8,7 +8,6 @@ import {
   FiPlus,
   FiShoppingBag,
   FiArrowRight,
-  FiHeart,
   FiTag,
   FiTruck,
   FiShield,
@@ -16,14 +15,8 @@ import {
 } from "react-icons/fi";
 
 const Cart = () => {
-  const {
-    products,
-    cartItem,
-    currency,
-    updateQuantity,
-    navigate,
-    getCartAmount,
-  } = useContext(ShopContext);
+  const { products, cartItem, currency, updateQuantity, navigate } =
+    useContext(ShopContext);
   const [cartData, setCartData] = useState([]);
   const [isUpdating, setIsUpdating] = useState({});
   const [removingItems, setRemovingItems] = useState(new Set());
@@ -38,7 +31,7 @@ const Cart = () => {
     setCartData(tempData);
   }, [cartItem]);
 
-  // Handle quantity updates with loading states
+  // Handle quantity updates
   const handleQuantityUpdate = async (itemId, size, newQuantity) => {
     const key = `${itemId}-${size}`;
     setIsUpdating((prev) => ({ ...prev, [key]: true }));
@@ -92,8 +85,7 @@ const Cart = () => {
     </div>
   );
 
-  const CartItem = ({ item }) => {
-    const productData = products.find((product) => product._id === item._id);
+  const CartItem = ({ item, productData }) => {
     const itemKey = `${item._id}-${item.size}`;
     const isRemoving = removingItems.has(itemKey);
     const isItemUpdating = isUpdating[itemKey];
@@ -111,17 +103,12 @@ const Cart = () => {
           <div className="relative group">
             <img
               className="w-full lg:w-32 h-32 lg:h-32 object-cover rounded-xl bg-gray-100"
-              src={
-                productData?.image?.[0]?.url ||
-                productData?.image?.[0] ||
-                "/placeholder.png"
-              }
+              src={productData?.image?.[0]?.url}
               alt={productData?.name || "Product"}
               onError={(e) => {
                 e.target.src = "/placeholder.png";
               }}
             />
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-xl transition-all duration-200"></div>
           </div>
 
           {/* Product Details */}
@@ -166,6 +153,7 @@ const Cart = () => {
                     }
                     disabled={item.quantity <= 1 || isItemUpdating}
                     className="p-2 hover:bg-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Decrease quantity"
                   >
                     <FiMinus className="w-4 h-4" />
                   </button>
@@ -200,30 +188,21 @@ const Cart = () => {
                     }
                     disabled={isItemUpdating || item.quantity >= 999}
                     className="p-2 hover:bg-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Increase quantity"
                   >
                     <FiPlus className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => console.log("Save for later:", item._id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    <FiHeart className="w-4 h-4" />
-                    Save
-                  </button>
-
-                  <button
-                    onClick={() => handleRemoveItem(item._id, item.size)}
-                    disabled={isRemoving}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm disabled:opacity-50"
-                  >
-                    <FiTrash2 className="w-4 h-4" />
-                    Remove
-                  </button>
-                </div>
+                {/* Remove Button */}
+                <button
+                  onClick={() => handleRemoveItem(item._id, item.size)}
+                  disabled={isRemoving}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm disabled:opacity-50"
+                >
+                  <FiTrash2 className="w-4 h-4" />
+                  Remove
+                </button>
               </div>
             </div>
           </div>
@@ -252,9 +231,17 @@ const Cart = () => {
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="xl:col-span-2 space-y-6">
-              {cartData.map((item) => (
-                <CartItem key={`${item._id}-${item.size}`} item={item} />
-              ))}
+              {cartData.map((item) => {
+                const productData = products.find((p) => p._id === item._id);
+                console.log(productData);
+                return (
+                  <CartItem
+                    key={`${item._id}-${item.size}`}
+                    item={item}
+                    productData={productData}
+                  />
+                );
+              })}
 
               {/* Trust Badges */}
               <div className="bg-white rounded-2xl p-6 border">
@@ -317,28 +304,11 @@ const Cart = () => {
                   </button>
 
                   <button
-                    onClick={() => navigate("/shop")}
+                    onClick={() => navigate("/collection")}
                     className="w-full flex items-center justify-center gap-3 border border-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
                   >
                     <span>Continue Shopping</span>
                   </button>
-                </div>
-
-                {/* Promo Code */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border">
-                  <h3 className="font-semibold text-gray-900 mb-4">
-                    Promo Code
-                  </h3>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Enter code"
-                      className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                    />
-                    <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-                      Apply
-                    </button>
-                  </div>
                 </div>
 
                 {/* Security Badge */}

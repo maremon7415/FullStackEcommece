@@ -3,10 +3,12 @@ import { useParams } from "react-router-dom";
 import { ShopContext } from "../contexts/ShopContextsProvider";
 import { IoMdStar, IoIosStarOutline } from "react-icons/io";
 import RelatedProducts from "../components/RelatedProducts";
+import { toast } from "react-toastify";
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency, addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart, token, navigate } =
+    useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [productImage, setProductImage] = useState("");
   const [size, setSize] = useState("");
@@ -25,6 +27,14 @@ const Product = () => {
 
   const handleImageClick = (image) => {
     setProductImage(image.url);
+  };
+  const handleAddToCart = () => {
+    if (!token) {
+      navigate("/login");
+      toast.error("Please Login or Create an Account");
+    } else {
+      addToCart(productData._id, size);
+    }
   };
 
   return productData ? (
@@ -103,7 +113,7 @@ const Product = () => {
           </div>
 
           <button
-            onClick={() => addToCart(productData._id, size)}
+            onClick={handleAddToCart}
             className="bg-black text-white px-8 py-3 text-sm font-semibold uppercase tracking-wider transition-colors duration-300 ease-in-out hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
           >
             Add to Cart
