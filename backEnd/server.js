@@ -25,7 +25,7 @@ const allowedOrigins = [
   "http://localhost:5173", // Local frontend
   "http://localhost:5174", // Admin frontend
   "https://myshop-frontend-puce.vercel.app", // Main frontend
-  "https://myshop-admin-ivory.vercel.app", // Admin frontend
+  "https://myshop-admin-taupe.vercel.app", // Admin frontend
 ];
 
 app.use(
