@@ -68,25 +68,12 @@ const userOrders = async (req, res) => {
 //update order status from Admin panel
 const orderStatus = async (req, res) => {
   try {
-    const { userId, status } = req.body; // Keep userId to match frontend
+    const { userId, status } = req.body;
 
-    // Validate status
-    const validStatuses = [
-      "pending",
-      "processing",
-      "shipped",
-      "delivered",
-      "cancelled",
-    ];
-    if (!validStatuses.includes(status)) {
-      return res.json({ success: false, message: "Invalid status" });
-    }
-
-    // Update the order by ID (userId is actually the orderId from frontend)
     const updatedOrder = await orderModel.findByIdAndUpdate(
       userId,
       { status },
-      { new: true } // Return updated document
+      { new: true }
     );
 
     if (!updatedOrder) {
@@ -99,7 +86,7 @@ const orderStatus = async (req, res) => {
       order: updatedOrder,
     });
   } catch (error) {
-    console.log("Error updating order status:", error);
+    console.log(error);
     res.json({ success: false, message: error.message });
   }
 };

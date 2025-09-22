@@ -62,6 +62,83 @@ const Order = ({ token }) => {
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
+  // Status configuration
+  const statusCards = [
+    {
+      key: "pending",
+      label: "Pending",
+      bg: "bg-yellow-100",
+      text: "text-yellow-600",
+      icon: (
+        <svg
+          className="w-5 h-5 text-yellow-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fillRule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ),
+    },
+    {
+      key: "processing",
+      label: "Processing",
+      bg: "bg-blue-100",
+      text: "text-blue-600",
+      icon: (
+        <svg
+          className="w-5 h-5 text-blue-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fillRule="evenodd"
+            d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ),
+    },
+    {
+      key: "shipped",
+      label: "Shipped",
+      bg: "bg-purple-100",
+      text: "text-purple-600",
+      icon: (
+        <svg
+          className="w-5 h-5 text-purple-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+          <path d="M3 4a1 1 0 00-1 1v1a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v1a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H21a1 1 0 001-1V8a1 1 0 00-1-1h-7z" />
+        </svg>
+      ),
+    },
+    {
+      key: "delivered",
+      label: "Delivered",
+      bg: "bg-green-100",
+      text: "text-green-600",
+      icon: (
+        <svg
+          className="w-5 h-5 text-green-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fillRule="evenodd"
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ),
+    },
+  ];
+
   // Get payment status
   const getPaymentStatus = (payment, paymentMethod) => {
     return payment ? (
@@ -128,103 +205,27 @@ const Order = ({ token }) => {
           <p className="text-gray-600">Manage and track customer orders</p>
         </div>
       </div>
-
-      {/* Stats Cards */}
+      {/* Ordder Status */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <svg
-                className="w-5 h-5 text-yellow-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {orders.filter((order) => order.status === "pending").length}
-              </p>
+        {statusCards.map((card) => (
+          <div
+            key={card.key}
+            className="bg-white p-4 rounded-lg shadow border border-gray-200"
+          >
+            <div className="flex items-center">
+              <div className={`p-2 ${card.bg} rounded-lg`}>{card.icon}</div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-600">
+                  {card.label}
+                </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {orders.filter((order) => order.status === card.key).length}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <svg
-                className="w-5 h-5 text-blue-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Processing</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {orders.filter((order) => order.status === "processing").length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <svg
-                className="w-5 h-5 text-purple-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                <path d="M3 4a1 1 0 00-1 1v1a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v1a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H21a1 1 0 001-1V8a1 1 0 00-1-1h-7z" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Shipped</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {orders.filter((order) => order.status === "shipped").length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <svg
-                className="w-5 h-5 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Delivered</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {orders.filter((order) => order.status === "delivered").length}
-              </p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
-
       {/* Orders Table - Desktop */}
       <div className="hidden lg:block bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
         <table className="w-full">
@@ -328,7 +329,6 @@ const Order = ({ token }) => {
           </tbody>
         </table>
       </div>
-
       {/* Orders Cards - Mobile */}
       <div className="lg:hidden space-y-4">
         {orders.map((order) => (
@@ -408,7 +408,6 @@ const Order = ({ token }) => {
           </div>
         ))}
       </div>
-
       {orders.length === 0 && !loading && (
         <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">
           <svg
