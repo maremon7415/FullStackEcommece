@@ -2,9 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../contexts/ShopContextsProvider";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
+import Spinner from "../components/Spinner";
 
 const BestSeller = () => {
-  const { products } = useContext(ShopContext);
+  const { products, loading } = useContext(ShopContext);
   const [BestSeller, setBestSeller] = useState([]);
 
   useEffect(() => {
@@ -22,17 +23,21 @@ const BestSeller = () => {
         </p>
       </div>
       {/* rendering best seller products  */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {BestSeller.map((item, index) => (
-          <ProductItem
-            key={index}
-            id={item._id}
-            image={item.image[0].url}
-            name={item.name}
-            price={item.price}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {BestSeller.map((item, index) => (
+            <ProductItem
+              key={index}
+              id={item._id}
+              image={item.image[0].url}
+              name={item.name}
+              price={item.price}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

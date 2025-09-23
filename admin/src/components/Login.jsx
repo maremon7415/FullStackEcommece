@@ -3,8 +3,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const Login = ({ backendUrl, setToken }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@myshop.com");
+  const [password, setPassword] = useState("admin1212");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 

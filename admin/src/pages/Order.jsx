@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Spinner from "../components/Spinner";
 
 const Order = ({ token }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -171,14 +172,8 @@ const Order = ({ token }) => {
   }, [token]);
 
   if (loading) {
-    return (
-      <div className="p-4 flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        <span className="ml-2 text-gray-600">Loading orders...</span>
-      </div>
-    );
+    return <Spinner />;
   }
-
   return (
     <div className="p-4 max-w-7xl mx-auto">
       {/* Header */}
@@ -227,7 +222,7 @@ const Order = ({ token }) => {
         ))}
       </div>
       {/* Orders Table - Desktop */}
-      <div className="hidden lg:block bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+      <div className=" bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -329,108 +324,6 @@ const Order = ({ token }) => {
           </tbody>
         </table>
       </div>
-      {/* Orders Cards - Mobile */}
-      <div className="lg:hidden space-y-4">
-        {orders.map((order) => (
-          <div
-            key={order._id}
-            className="bg-white rounded-lg shadow border border-gray-200 p-4"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-gray-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-2">
-                  <div className="text-sm font-medium text-gray-900">
-                    {order.address[0].firstName} {order.address[0].lastName}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {order.address[0].email}
-                  </div>
-                </div>
-              </div>
-              <span
-                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                  order.status
-                )}`}
-              >
-                {order.status}
-              </span>
-            </div>
-
-            <div className="space-y-2 mb-3">
-              <div className="text-sm">
-                <span className="font-medium text-gray-700">Items:</span>
-                <div className="mt-1">
-                  {order.items.map((item) => (
-                    <div key={item._id} className="text-gray-600">
-                      {item.name} ({item.size}) x {item.quantity}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex justify-between text-sm">
-                <span className="font-medium text-gray-700">Amount:</span>
-                <span className="font-medium text-gray-900">
-                  ${order.amount}
-                </span>
-              </div>
-
-              <div className="flex justify-between text-sm">
-                <span className="font-medium text-gray-700">Payment:</span>
-                {getPaymentStatus(order.payment, order.paymentMethod)}
-              </div>
-            </div>
-
-            <select
-              value={order.status}
-              onChange={(e) => updateStatus(order._id, e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-        ))}
-      </div>
-      {orders.length === 0 && !loading && (
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
-            No orders found
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            No orders have been placed yet.
-          </p>
-        </div>
-      )}
     </div>
   );
 };

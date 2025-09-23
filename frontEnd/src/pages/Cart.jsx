@@ -17,11 +17,15 @@ import {
 const Cart = () => {
   const { products, cartItem, currency, updateQuantity, navigate } =
     useContext(ShopContext);
-  const [cartData, setCartData] = useState([]);
-  const [isUpdating, setIsUpdating] = useState({});
-  const [removingItems, setRemovingItems] = useState(new Set());
 
-  // Rebuild cart data whenever cartItem changes
+  const [cartData, setCartData] = useState([]); // Flattened cart for UI
+  const [isUpdating, setIsUpdating] = useState({}); // Tracks quantity update states
+  const [removingItems, setRemovingItems] = useState(new Set()); // Tracks removing animation
+
+  // Helper to generate unique key for each item-size
+  const getItemKey = (id, size) => `${id}-${size}`;
+
+  // Rebuild cartData whenever cartItem changes
   useEffect(() => {
     const tempData = Object.entries(cartItem ?? {}).flatMap(([id, sizes]) =>
       Object.entries(sizes ?? {})
@@ -33,12 +37,13 @@ const Cart = () => {
 
   // Handle quantity updates
   const handleQuantityUpdate = async (itemId, size, newQuantity) => {
-    const key = `${itemId}-${size}`;
+    const key = getItemKey(itemId, size);
     setIsUpdating((prev) => ({ ...prev, [key]: true }));
 
     try {
       await updateQuantity(itemId, size, newQuantity);
     } finally {
+      // Small delay to keep UI smooth
       setTimeout(() => {
         setIsUpdating((prev) => ({ ...prev, [key]: false }));
       }, 500);
@@ -47,11 +52,11 @@ const Cart = () => {
 
   // Handle item removal with animation
   const handleRemoveItem = async (itemId, size) => {
-    const key = `${itemId}-${size}`;
+    const key = getItemKey(itemId, size);
     setRemovingItems((prev) => new Set(prev).add(key));
 
     setTimeout(async () => {
-      await updateQuantity(itemId, size, 0);
+      await updateQuantity(itemId, size, 0); // Remove from cart
       setRemovingItems((prev) => {
         const newSet = new Set(prev);
         newSet.delete(key);
@@ -60,6 +65,7 @@ const Cart = () => {
     }, 300);
   };
 
+  // Empty cart UI
   const EmptyCart = () => (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="text-center max-w-md mx-auto">
@@ -85,12 +91,13 @@ const Cart = () => {
     </div>
   );
 
+  // Single Cart Item
   const CartItem = ({ item, productData }) => {
-    const itemKey = `${item._id}-${item.size}`;
+    const itemKey = getItemKey(item._id, item.size);
     const isRemoving = removingItems.has(itemKey);
     const isItemUpdating = isUpdating[itemKey];
 
-    if (!productData) return null;
+    if (!productData) return null; // Safeguard for missing product
 
     return (
       <div
@@ -106,7 +113,7 @@ const Cart = () => {
               src={productData?.image?.[0]?.url}
               alt={productData?.name || "Product"}
               onError={(e) => {
-                e.target.src = "/placeholder.png";
+                if (e.currentTarget) e.currentTarget.src = "/placeholder.png";
               }}
             />
           </div>
@@ -167,8 +174,10 @@ const Cart = () => {
                         value={item.quantity}
                         onChange={(e) => {
                           const val = parseInt(e.target.value);
-                          if (val > 0 && val <= 999) {
+                          if (!isNaN(val) && val > 0 && val <= 999) {
                             handleQuantityUpdate(item._id, item.size, val);
+                          } else {
+                            e.target.value = item.quantity; // reset invalid entry
                           }
                         }}
                         className="w-full text-center bg-transparent text-lg font-semibold focus:outline-none"
@@ -233,10 +242,9 @@ const Cart = () => {
             <div className="xl:col-span-2 space-y-6">
               {cartData.map((item) => {
                 const productData = products.find((p) => p._id === item._id);
-                console.log(productData);
                 return (
                   <CartItem
-                    key={`${item._id}-${item.size}`}
+                    key={getItemKey(item._id, item.size)}
                     item={item}
                     productData={productData}
                   />

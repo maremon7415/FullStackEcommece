@@ -5,17 +5,19 @@ import { toast } from "react-toastify";
 import { backendUrl } from "../App";
 
 const Add = ({ token }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Men");
-  const [subCategory, setSubCategory] = useState("Topwear");
-  const [images, setImages] = useState([null, null, null, null]);
-  const [sizes, setSizes] = useState([]);
-  const [bestSeller, setBestSeller] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // ---------------- STATE ----------------
+  const [name, setName] = useState(""); // Product name
+  const [description, setDescription] = useState(""); // Product description
+  const [price, setPrice] = useState(""); // Product price
+  const [category, setCategory] = useState("Men"); // Default category
+  const [subCategory, setSubCategory] = useState("Topwear"); // Default sub-category
+  const [images, setImages] = useState([null, null, null, null]); // Up to 4 product images
+  const [sizes, setSizes] = useState([]); // Selected product sizes
+  const [bestSeller, setBestSeller] = useState(false); // Best seller toggle
+  const [isLoading, setIsLoading] = useState(false); // Loader for form submit
 
-  // Clean up object URLs to avoid memory leaks
+  // ---------------- EFFECT: CLEANUP ----------------
+  // Clean up object URLs to avoid memory leaks when images change
   useEffect(() => {
     return () => {
       images.forEach((img) => {
@@ -24,7 +26,9 @@ const Add = ({ token }) => {
     };
   }, [images]);
 
-  // Handle image selection
+  // ---------------- HANDLERS ----------------
+
+  // Handle image selection for each upload box
   const handleImageCng = (e, index) => {
     const file = e.target.files[0];
     if (file) {
@@ -34,7 +38,7 @@ const Add = ({ token }) => {
     }
   };
 
-  // Handle size selection toggle
+  // Toggle sizes on/off
   const toggleSize = (size) => {
     if (sizes.includes(size)) {
       setSizes(sizes.filter((s) => s !== size));
@@ -43,17 +47,19 @@ const Add = ({ token }) => {
     }
   };
 
-  // Form validation
+  // Basic form validation before submit
   const isFormValid =
     name.trim() &&
     description.trim() &&
     price &&
-    images.some(Boolean) &&
-    sizes.length > 0;
+    images.some(Boolean) && // At least 1 image must be uploaded
+    sizes.length > 0; // At least 1 size selected
 
-  // Handle submit
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // If validation fails, show error
     if (!isFormValid) {
       toast.error("Please fill all required fields and select sizes/images.");
       return;
@@ -61,6 +67,7 @@ const Add = ({ token }) => {
 
     setIsLoading(true);
     try {
+      // Prepare form data for backend
       const formData = new FormData();
       formData.append("name", name);
       formData.append("description", description);
@@ -72,21 +79,23 @@ const Add = ({ token }) => {
       // Send sizes as JSON string
       formData.append("sizes", JSON.stringify(sizes));
 
-      // Append images
+      // Append all images if available
       images.forEach((img, i) => {
         if (img) formData.append(`image${i + 1}`, img);
       });
 
+      // API request
       const response = await axios.post(
         `${backendUrl}/api/product/add`,
         formData,
-        { headers: { token: token } }
+        { headers: { token } }
       );
 
+      // Handle response
       if (response.data.success) {
         toast.success(response.data.message);
 
-        // Reset form
+        // Reset form after successful submit
         setName("");
         setDescription("");
         setPrice("");
@@ -99,22 +108,23 @@ const Add = ({ token }) => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ---------------- UI ----------------
   return (
     <div className="mx-12 my-4">
       <h2 className="text-2xl font-bold mb-4">Add Products</h2>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        {/* Images */}
+        {/* ---------- Image Upload Section ---------- */}
         <div>
           <h2 className="text-lg mb-4">Upload Product Images</h2>
           <div className="flex gap-2 cursor-pointer">
-            {[1, 2, 3, 4].map((item, index) => (
+            {[1, 2, 3, 4].map((_, index) => (
               <div
                 key={index}
                 className="w-[120px] h-[120px] border rounded flex items-center justify-center"
@@ -143,7 +153,7 @@ const Add = ({ token }) => {
           </div>
         </div>
 
-        {/* Name */}
+        {/* ---------- Product Name ---------- */}
         <div className="w-full">
           <h2 className="text-lg mb-2">Product Name</h2>
           <input
@@ -156,7 +166,7 @@ const Add = ({ token }) => {
           />
         </div>
 
-        {/* Description */}
+        {/* ---------- Product Description ---------- */}
         <div className="w-full">
           <h2 className="text-lg mb-2">Product Description</h2>
           <textarea
@@ -168,8 +178,9 @@ const Add = ({ token }) => {
           />
         </div>
 
-        {/* Category & SubCategory */}
+        {/* ---------- Category & SubCategory ---------- */}
         <div className="flex gap-6">
+          {/* Category */}
           <div>
             <h2 className="text-lg mb-2">Category</h2>
             <select
@@ -182,6 +193,8 @@ const Add = ({ token }) => {
               <option value="Kids">Kids</option>
             </select>
           </div>
+
+          {/* SubCategory */}
           <div>
             <h2 className="text-lg mb-2">Sub Category</h2>
             <select
@@ -199,16 +212,16 @@ const Add = ({ token }) => {
           <div>
             <h2 className="text-lg mb-2">Sizes</h2>
             <div className="flex gap-2">
-              {["S", "M", "L", "XL", "XXL"].map((item, index) => (
+              {["S", "M", "L", "XL", "XXL"].map((size, index) => (
                 <button
                   type="button"
                   key={index}
-                  onClick={() => toggleSize(item)}
+                  onClick={() => toggleSize(size)}
                   className={`px-3 py-1 border rounded ${
-                    sizes.includes(item) ? "bg-black text-white" : ""
+                    sizes.includes(size) ? "bg-black text-white" : ""
                   }`}
                 >
-                  {item}
+                  {size}
                 </button>
               ))}
             </div>
@@ -228,7 +241,7 @@ const Add = ({ token }) => {
           </div>
         </div>
 
-        {/* Best Seller */}
+        {/* ---------- Best Seller ---------- */}
         <div className="flex gap-2 items-center text-lg">
           <h2>Best Seller</h2>
           <input
@@ -239,7 +252,7 @@ const Add = ({ token }) => {
           />
         </div>
 
-        {/* Submit */}
+        {/* ---------- Submit Button ---------- */}
         <button
           type="submit"
           disabled={!isFormValid || isLoading}
