@@ -1,10 +1,21 @@
 import Title from "../components/Title";
 import CartTotal from "../components/CartTotal";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
 import { ShopContext } from "../contexts/ShopContextsProvider";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FiArrowLeft, FiLock, FiTruck } from "react-icons/fi";
+
+const InputField = ({ name, value, onChange, placeholder }) => (
+  <input
+    name={name}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    required
+    className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-black"
+  />
+);
 
 const PlaceOrders = () => {
   const [method, setMethod] = useState("COD");
@@ -95,17 +106,6 @@ const PlaceOrders = () => {
       setIsSubmitting(false);
     }
   };
-
-  const InputField = ({ name, value, onChange, placeholder }) => (
-    <input
-      name={name}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      required
-      className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-black"
-    />
-  );
 
   const orderSummary = Object.entries(cartItem).flatMap(([itemId, sizes]) =>
     Object.entries(sizes)
